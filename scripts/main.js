@@ -33,37 +33,86 @@ async function loadAllComponents() {
         await loadGalleryStrip();
     }
 
+    // Inject mobile drawer at body level (outside nav stacking context)
+    const drawerHTML = `
+        <div class="nav-drawer" id="nav-drawer">
+            <div class="drawer-header">
+                <div class="drawer-logo">KALYRA</div>
+                <div class="drawer-close" id="drawer-close">&times;</div>
+            </div>
+            <div class="drawer-content">
+                <ul class="drawer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="#login" class="nav-cta">Login</a>
+</li>
+                </ul>
+                <div class="drawer-footer"><p>ELEVATE YOUR LIFESTYLE</p></div>
+            </div>
+        </div>
+        <div class="nav-overlay" id="nav-overlay"></div>`;
+    document.body.insertAdjacentHTML('beforeend', drawerHTML);
+
+    // Load and inject modals
+    try {
+        const [loginRes, signupRes] = await Promise.all([
+            fetch('components/login-modal.html'),
+            fetch('components/signup-modal.html')
+        ]);
+        const [loginHTML, signupHTML] = await Promise.all([
+            loginRes.text(),
+            signupRes.text()
+        ]);
+        document.body.insertAdjacentHTML('beforeend', loginHTML);
+        document.body.insertAdjacentHTML('beforeend', signupHTML);
+    } catch(e) {
+        console.error('Could not load modals:', e);
+    }
+
     // Initialize all functionality after components are loaded
-    setTimeout(() => {
-        initNavbarScroll();
-        initScrollReveal();
-        initFaqAccordion();
-    }, 100);
+    initNavbarScroll();
+    initScrollReveal();
+    initFaqAccordion();
+    initMobileMenu();
+    initModals();
 }
 
 async function loadGalleryStrip() {
+    const galleryImages = [
+        'assets/floral-gem-art.jpg',
+        'assets/anklet-embroidery-tote.jpg',
+        'assets/mirror-butterfly-art.jpg',
+        'assets/mandala-art-sketchbook.jpg',
+        'assets/floral-resin-coasters.jpg',
+        'assets/flower-shaped-resin-coasters.jpg',
+        'assets/black-resin-name-plate.jpg',
+        'assets/doctor-resin-name-plate.jpg',
+        'assets/ceo-resin-name-plate.jpg',
+        'assets/wedding-resin-plate.jpg'
+    ];
+
+    // Double the images for seamless loop
+    const itemsHTML = [...galleryImages, ...galleryImages].map(src => `
+        <div class="gallery-item">
+            <img src="${src}" alt="Kalyra Art">
+        </div>
+    `).join('');
+
     const galleryHTML = `
-    <div class="gallery-strip">
-      <div class="gallery-track">
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/MKTdbezeqUUrolGltUOAIG3sRg.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/GxJ7bqRid5liIOB1FVg9TZJ7M.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/bZNGs9VJC7dswgDkCkX7iLc7U.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/f9qA5AbcJUKCtArMaR0MghhX6vc.png?width=900&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/Yrh7HbbMCn3HXrqSrrnlohbLI.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/uhZKyF3IWQelSEWD8lMHvnmvc4.png?width=1200&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/Ht0OY1QpaA0q8bQCoeKDLunXoM.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/tqlWY6b3WGtxl97y8EeyoFtVJY.jpg?width=900&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/MKTdbezeqUUrolGltUOAIG3sRg.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/GxJ7bqRid5liIOB1FVg9TZJ7M.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/bZNGs9VJC7dswgDkCkX7iLc7U.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/f9qA5AbcJUKCtArMaR0MghhX6vc.png?width=900&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/Yrh7HbbMCn3HXrqSrrnlohbLI.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/uhZKyF3IWQelSEWD8lMHvnmvc4.png?width=1200&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/Ht0OY1QpaA0q8bQCoeKDLunXoM.png?width=960&height=1200" alt="beauty"></div>
-        <div class="gallery-item"><img src="https://framerusercontent.com/images/tqlWY6b3WGtxl97y8EeyoFtVJY.jpg?width=900&height=1200" alt="beauty"></div>
-      </div>
-    </div>
-  `;
+        <div class="gallery-strip">
+            <div class="section-header reveal" style="margin-bottom: 40px;">
+                <div>
+                    <div class="section-label">Indo-Western Art</div>
+                    <h2 class="section-title">Collector <em>Reviews</em></h2>
+                </div>
+            </div>
+            <div class="gallery-track">
+                ${itemsHTML}
+            </div>
+        </div>
+    `;
     document.getElementById('gallery-strip').innerHTML = galleryHTML;
 }
 
@@ -97,6 +146,93 @@ function initFaqAccordion() {
             const isOpen = item.classList.contains('open');
             document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
             if (!isOpen) item.classList.add('open');
+        });
+    });
+}
+
+function initMobileMenu() {
+    const toggle = document.getElementById('nav-toggle');
+    const drawer = document.getElementById('nav-drawer');
+    const overlay = document.getElementById('nav-overlay');
+    const closeBtn = document.getElementById('drawer-close');
+    const drawerLinks = document.querySelectorAll('.drawer-links a');
+
+    if (!toggle || !drawer || !overlay) return;
+
+    const toggleMenu = () => {
+        drawer.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = drawer.classList.contains('active') ? 'hidden' : '';
+    };
+
+    toggle.addEventListener('click', toggleMenu);
+    closeBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    drawerLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            drawer.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+}
+
+function initModals() {
+    const loginModal = document.getElementById('login-modal');
+    const loginBackdrop = document.getElementById('login-backdrop');
+    const signupModal = document.getElementById('signup-modal');
+    const signupBackdrop = document.getElementById('signup-backdrop');
+
+    const toSignup = document.getElementById('to-signup');
+    const toLogin = document.getElementById('to-login');
+
+    const openLogin = (e) => {
+        if (e) e.preventDefault();
+        closeAllModals();
+        loginModal?.classList.add('active');
+        loginBackdrop?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const openSignup = (e) => {
+        if (e) e.preventDefault();
+        closeAllModals();
+        signupModal?.classList.add('active');
+        signupBackdrop?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeAllModals = () => {
+        [loginModal, loginBackdrop, signupModal, signupBackdrop].forEach(el => el?.classList.remove('active'));
+        document.body.style.overflow = '';
+    };
+
+    // Global triggers
+    document.querySelectorAll('a[href="#login"]').forEach(a => a.addEventListener('click', openLogin));
+    document.querySelectorAll('a[href="#signup"]').forEach(a => a.addEventListener('click', openSignup));
+
+    // Internal switches
+    toSignup?.addEventListener('click', openSignup);
+    toLogin?.addEventListener('click', openLogin);
+
+    // Close buttons
+    [document.getElementById('login-close'), document.getElementById('signup-close')].forEach(b => b?.addEventListener('click', closeAllModals));
+    
+    // Backdrop clicks
+    [loginBackdrop, signupBackdrop].forEach(b => b?.addEventListener('click', closeAllModals));
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllModals();
+    });
+
+    // Toggle PW
+    ['login', 'signup'].forEach(type => {
+        const btn = document.getElementById(`${type}-toggle-pw`);
+        const input = document.getElementById(`${type}-password`);
+        btn?.addEventListener('click', () => {
+            if (input) input.type = input.type === 'password' ? 'text' : 'password';
         });
     });
 }

@@ -1,0 +1,60 @@
+<div class="signup-backdrop" id="signup-backdrop"></div>
+
+<div class="login-modal" id="signup-modal" role="dialog" aria-modal="true" aria-label="Sign Up">
+    <button class="login-close" id="signup-close" aria-label="Close signup">&times;</button>
+
+    <div style="text-align: center;">
+        <h2 class="login-title">Join <em>Kalyra</em></h2>
+        <p class="login-sub">Create an account to start your collection</p>
+    </div>
+
+    <form class="login-form" id="signup-form" novalidate>
+
+        <div class="login-field">
+            <label class="login-label" for="signup-identifier">Email or Phone</label>
+            <div class="login-input-wrap">
+                <input
+                    type="text"
+                    id="signup-identifier"
+                    name="identifier"
+                    class="login-input"
+                    placeholder="you@example.com or +91 ..."
+                    autocomplete="username"
+                    required
+                >
+            </div>
+        </div>
+
+        <div class="login-field">
+            <label class="login-label" for="signup-password">Create Password</label>
+            <div class="login-input-wrap">
+                <input
+                    type="password"
+                    id="signup-password"
+                    name="password"
+                    class="login-input"
+                    placeholder="Choose a password"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+        </div>
+
+        <div style="margin: 4px 0 8px;">
+            <label class="login-remember">
+                <input type="checkbox" name="remember" id="signup-remember">
+                <span class="login-check-box"></span>
+                <span class="login-check-label">Remember me</span>
+            </label>
+        </div>
+
+        <button type="submit" class="login-submit">Sign Up</button>
+
+        <div class="login-row" style="justify-content: center;">
+            <a href="#login" class="login-forgot" id="to-login">Already have an account?</a>
+        </div>
+
+    </form>
+
+
+</div>

@@ -1,0 +1,59 @@
+<div class="login-backdrop" id="login-backdrop"></div>
+
+<div class="login-modal" id="login-modal" role="dialog" aria-modal="true" aria-label="Login">
+    <button class="login-close" id="login-close" aria-label="Close login">&times;</button>
+
+    <div style="text-align: center;">
+        <h2 class="login-title">Welcome <em>Back</em></h2>
+        <p class="login-sub">Sign in to your account to continue</p>
+    </div>
+
+    <form class="login-form" id="login-form" novalidate>
+
+        <div class="login-field">
+            <label class="login-label" for="login-identifier">Email or Phone</label>
+            <div class="login-input-wrap">
+                <input
+                    type="text"
+                    id="login-identifier"
+                    name="identifier"
+                    class="login-input"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+        </div>
+
+        <div class="login-field">
+            <label class="login-label" for="login-password">Password</label>
+            <div class="login-input-wrap">
+                <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    class="login-input"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+        </div>
+
+        <div style="margin: 4px 0 8px;">
+            <label class="login-remember">
+                <input type="checkbox" name="remember" id="login-remember">
+                <span class="login-check-box"></span>
+                <span class="login-check-label">Remember me</span>
+            </label>
+        </div>
+
+        <button type="submit" class="login-submit">Login</button>
+
+        <div class="login-row">
+            <a href="#" class="login-forgot">Forgot password?</a>
+            <a href="#signup" class="login-forgot" id="to-signup">Create an account?</a>
+        </div>
+
+    </form>
+
+
+</div>
