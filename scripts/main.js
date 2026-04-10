@@ -13,9 +13,11 @@ const components = {
 async function loadComponent(elementId, filePath) {
     const element = document.getElementById(elementId);
     if (!element) return false;
-    
+
     try {
-        const response = await fetch(filePath);
+        // Add cache-busting timestamp to prevent aggressive default caching
+        const cacheBuster = `?t=${new Date().getTime()}`;
+        const response = await fetch(filePath + cacheBuster);
         const html = await response.text();
         element.innerHTML = html;
         return true;
@@ -34,7 +36,7 @@ async function loadAllComponents() {
     }
 
     // Inject mobile drawer at body level (outside nav stacking context)
-    const drawerHTML = `
+    const drawersHTML = `
         <div class="nav-drawer" id="nav-drawer">
             <div class="drawer-header">
                 <div class="drawer-logo">KALYRA</div>
@@ -46,14 +48,13 @@ async function loadAllComponents() {
                     <li><a href="shop.html">Shop</a></li>
                     <li><a href="about.html">About Us</a></li>
                     <li><a href="contact.html">Contact</a></li>
-                    <li><a href="#login" class="nav-cta">Login</a>
-</li>
+                    <li><a href="#login" class="nav-cta">Login</a></li>
                 </ul>
                 <div class="drawer-footer"><p>ELEVATE YOUR LIFESTYLE</p></div>
             </div>
         </div>
         <div class="nav-overlay" id="nav-overlay"></div>`;
-    document.body.insertAdjacentHTML('beforeend', drawerHTML);
+    document.body.insertAdjacentHTML('beforeend', drawersHTML);
 
     // Load and inject modals
     try {
@@ -67,7 +68,7 @@ async function loadAllComponents() {
         ]);
         document.body.insertAdjacentHTML('beforeend', loginHTML);
         document.body.insertAdjacentHTML('beforeend', signupHTML);
-    } catch(e) {
+    } catch (e) {
         console.error('Could not load modals:', e);
     }
 
@@ -76,7 +77,31 @@ async function loadAllComponents() {
     initScrollReveal();
     initFaqAccordion();
     initMobileMenu();
+    initMobileSearch();
     initModals();
+}
+
+function initMobileSearch() {
+    const trigger = document.getElementById('mobile-search-trigger');
+    const dropdown = document.getElementById('mobile-search-dropdown');
+    const closeBtn = document.getElementById('mobile-search-close');
+    const input = document.getElementById('mobile-search-input');
+
+    if (!trigger || !dropdown || !closeBtn) return;
+
+    trigger.addEventListener('click', () => {
+        dropdown.classList.add('active');
+        input?.focus();
+    });
+
+    closeBtn.addEventListener('click', () => {
+        dropdown.classList.remove('active');
+    });
+
+    // Close on escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') dropdown.classList.remove('active');
+    });
 }
 
 async function loadGalleryStrip() {
@@ -218,7 +243,7 @@ function initModals() {
 
     // Close buttons
     [document.getElementById('login-close'), document.getElementById('signup-close')].forEach(b => b?.addEventListener('click', closeAllModals));
-    
+
     // Backdrop clicks
     [loginBackdrop, signupBackdrop].forEach(b => b?.addEventListener('click', closeAllModals));
 
