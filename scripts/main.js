@@ -14,14 +14,19 @@ async function loadComponent(elementId, filePath) {
     const element = document.getElementById(elementId);
     if (!element) return false;
 
+    // Skip loading if already has substantial inlined content
+    if (element.children.length > 0 || element.innerText.trim().length > 100) {
+        return true;
+    }
+
     try {
         // Cache-busting only for web protocols (http/https) to prevent failures on file://
         const isWeb = window.location.protocol.startsWith('http');
         const cacheBuster = isWeb ? `?t=${new Date().getTime()}` : '';
-        
+
         const response = await fetch(filePath + cacheBuster);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const html = await response.text();
         element.innerHTML = html;
         return true;
@@ -34,9 +39,9 @@ async function loadComponent(elementId, filePath) {
 async function loadAllComponents() {
     // Robust check for shop page
     const isShopPage = window.location.pathname.endsWith('shop.html') || window.location.pathname.endsWith('shop') || window.location.pathname.includes('/shop/');
-    
+
     console.log('Initial Shop Page Check:', { pathname: window.location.pathname, isShopPage });
-    
+
     const loadPromises = Object.keys(components).map(id => {
         let path = components[id];
         if (id === 'shop' && isShopPage) {
@@ -44,13 +49,13 @@ async function loadAllComponents() {
         }
         return loadComponent(id, path);
     });
-    
+
     await Promise.all(loadPromises);
 
     // Recalculate isShopPage after components are loaded into the DOM
     const shopGridExists = !!document.getElementById('shop-products-grid');
     const finalIsShopPage = window.location.pathname.includes('shop.html') || shopGridExists;
-    
+
     console.log('Final Shop Page Check:', { finalIsShopPage, shopGridExists });
 
     if (document.getElementById('gallery-strip')) {
@@ -68,33 +73,38 @@ async function loadAllComponents() {
                 <div class="drawer-content">
                     <ul class="drawer-links">
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="shop.html">Shop</a></li>
+                        <li class="has-dropdown">
+                            <div class="drawer-link-row">
+                                <a href="shop.html">Shop</a>
+                                <button class="drawer-dropdown-toggle">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                            </div>
+                            <ul class="drawer-submenu">
+                                <li><a href="shop.html?category=bespoke">Bespoke Collection</a></li>
+                                <li><a href="shop.html?category=artistry">Artistry Collection</a></li>
+                                <li><a href="shop.html?category=living">Living Collection</a></li>
+                                <li><a href="shop.html?category=wearable">Wearable Collection</a></li>
+                            </ul>
+                        </li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="contact.html">Contact</a></li>
-                        <li><a href="#login" class="nav-cta">Login</a></li>
                     </ul>
-                    <div class="drawer-footer"><p>ELEVATE YOUR LIFESTYLE</p></div>
                 </div>
+                <div class="drawer-footer"><p>ELEVATE YOUR LIFESTYLE</p></div>
             </div>
             <div class="nav-overlay" id="nav-overlay"></div>`;
         document.body.insertAdjacentHTML('beforeend', drawersHTML);
     }
 
-    // Load and inject modals
+    // Load and inject unified login modal
     if (!document.getElementById('login-modal')) {
         try {
-            const [loginRes, signupRes] = await Promise.all([
-                fetch('components/login-modal.html'),
-                fetch('components/signup-modal.html')
-            ]);
-            const [loginHTML, signupHTML] = await Promise.all([
-                loginRes.text(),
-                signupRes.text()
-            ]);
+            const loginRes = await fetch('components/login-modal.html');
+            const loginHTML = await loginRes.text();
             document.body.insertAdjacentHTML('beforeend', loginHTML);
-            document.body.insertAdjacentHTML('beforeend', signupHTML);
         } catch (e) {
-            console.error('Could not load modals:', e);
+            console.error('Could not load modal:', e);
         }
     }
 
@@ -105,7 +115,7 @@ async function loadAllComponents() {
     initMobileMenu();
     initMobileSearch();
     initModals();
-    
+
     if (finalIsShopPage) {
         console.log('Detected Shop Page, initializing filters...');
         // Use a more robust check for DOM readiness
@@ -146,7 +156,7 @@ function initShopFilters() {
     ];
 
     let cardsContainer = document.getElementById('shop-products-grid') || document.querySelector('.products-grid');
-    
+
     // Fallback/Retry logic for slow DOM injection
     if (!cardsContainer) {
         console.warn('Shop grid not found immediately, retrying...');
@@ -173,7 +183,7 @@ function initShopFilters() {
         card.dataset.category = p.category;
         card.dataset.price = price;
         card.dataset.style = p.style;
-        
+
         card.innerHTML = `
             <div class="product-img-wrap">
                 <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/400x500/F5F0E8/8C7E72?text=Coming+Soon';">
@@ -228,7 +238,7 @@ function initShopFilters() {
             const view = btn.dataset.view;
             viewBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             if (cardsContainer) {
                 cardsContainer.className = `products-grid ${view}`;
             }
@@ -434,64 +444,97 @@ function initMobileMenu() {
             document.body.style.overflow = '';
         });
     });
+
+    // Mobile Drawer Dropdown Toggle
+    const dropdownToggle = document.querySelector('.drawer-dropdown-toggle');
+    const submenu = document.querySelector('.drawer-submenu');
+    
+    dropdownToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownToggle.classList.toggle('active');
+        submenu.classList.toggle('active');
+    });
 }
 
 function initModals() {
     const loginModal = document.getElementById('login-modal');
     const loginBackdrop = document.getElementById('login-backdrop');
-    const signupModal = document.getElementById('signup-modal');
-    const signupBackdrop = document.getElementById('signup-backdrop');
 
-    const toSignup = document.getElementById('to-signup');
-    const toLogin = document.getElementById('to-login');
+    const steps = {
+        phone: document.getElementById('login-step-phone'),
+        otp: document.getElementById('login-step-otp'),
+        email: document.getElementById('login-step-email')
+    };
+
+    const showStep = (stepName) => {
+        Object.values(steps).forEach(s => s ? s.hidden = true : null);
+        if (steps[stepName]) steps[stepName].hidden = false;
+    };
 
     const openLogin = (e) => {
         if (e) e.preventDefault();
-        closeAllModals();
+        showStep('phone');
         loginModal?.classList.add('active');
         loginBackdrop?.classList.add('active');
         document.body.style.overflow = 'hidden';
     };
 
-    const openSignup = (e) => {
-        if (e) e.preventDefault();
-        closeAllModals();
-        signupModal?.classList.add('active');
-        signupBackdrop?.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    };
-
     const closeAllModals = () => {
-        [loginModal, loginBackdrop, signupModal, signupBackdrop].forEach(el => el?.classList.remove('active'));
+        loginModal?.classList.remove('active');
+        loginBackdrop?.classList.remove('active');
         document.body.style.overflow = '';
     };
 
-    // Global triggers
-    document.querySelectorAll('a[href="#login"]').forEach(a => a.addEventListener('click', openLogin));
-    document.querySelectorAll('a[href="#signup"]').forEach(a => a.addEventListener('click', openSignup));
-
-    // Internal switches
-    toSignup?.addEventListener('click', openSignup);
-    toLogin?.addEventListener('click', openLogin);
-
-    // Close buttons
-    [document.getElementById('login-close'), document.getElementById('signup-close')].forEach(b => b?.addEventListener('click', closeAllModals));
-
-    // Backdrop clicks
-    [loginBackdrop, signupBackdrop].forEach(b => b?.addEventListener('click', closeAllModals));
-
-    // Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeAllModals();
+    // Interaction Listeners
+    document.getElementById('btn-send-otp')?.addEventListener('click', () => {
+        const phone = document.getElementById('login-phone')?.value;
+        if (phone?.length === 10) {
+            showStep('otp');
+            document.querySelector('.otp-digit')?.focus();
+        } else {
+            alert('Please enter a valid 10-digit number');
+        }
     });
 
-    // Toggle PW
-    ['login', 'signup'].forEach(type => {
-        const btn = document.getElementById(`${type}-toggle-pw`);
-        const input = document.getElementById(`${type}-password`);
-        btn?.addEventListener('click', () => {
-            if (input) input.type = input.type === 'password' ? 'text' : 'password';
+    document.getElementById('btn-to-email')?.addEventListener('click', () => showStep('email'));
+    document.getElementById('btn-back-to-phone')?.addEventListener('click', () => showStep('phone'));
+    document.getElementById('btn-back-to-phone-from-email')?.addEventListener('click', () => showStep('phone'));
+
+    document.getElementById('btn-verify-otp')?.addEventListener('click', () => {
+        alert('Verification successful! Logging you in...');
+        closeAllModals();
+    });
+
+    document.getElementById('btn-email-login')?.addEventListener('click', () => {
+        alert('Logging in with Email & Password...');
+        closeAllModals();
+    });
+
+    // OTP Input Logic
+    const otpDigits = document.querySelectorAll('.otp-digit');
+    otpDigits.forEach((digit, idx) => {
+        digit.addEventListener('input', (e) => {
+            if (e.target.value.length === 1 && idx < otpDigits.length - 1) {
+                otpDigits[idx + 1].focus();
+            }
         });
+        digit.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                otpDigits[idx - 1].focus();
+            }
+        });
+    });
+
+    // Global triggers
+    document.querySelectorAll('a[href="#login"]').forEach(a => a.addEventListener('click', openLogin));
+    document.querySelectorAll('a[href="#signup"]').forEach(a => a.addEventListener('click', openLogin)); // Signup also opens login
+
+    // Close functionality
+    document.getElementById('login-close')?.addEventListener('click', closeAllModals);
+    loginBackdrop?.addEventListener('click', closeAllModals);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllModals();
     });
 }
 
