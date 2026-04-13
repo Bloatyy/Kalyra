@@ -157,13 +157,20 @@ nav.scrolled {
   outline: none;
 }
 
-.nav-mobile-search-close {
+.nav-mobile-search-btn {
   background: none;
   border: none;
-  font-size: 24px;
   color: var(--mid);
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s;
+}
+
+.nav-mobile-search-btn:hover {
+  color: var(--accent);
 }
 
 .nav-mobile-toggle {
@@ -203,8 +210,8 @@ nav.scrolled {
   border: 1px solid var(--accent-light);
   padding: 8px 16px;
   border-radius: 100px;
-  transition: all 0.3s ease;
-  width: 150px;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  width: 160px;
   flex-shrink: 1;
   min-width: 120px;
 }
@@ -213,6 +220,25 @@ nav.scrolled {
   background: var(--pure-white);
   border-color: var(--accent-light);
   box-shadow: 0 4px 12px rgba(184, 155, 113, 0.1);
+}
+
+.nav-search-btn {
+  background: none;
+  border: none;
+  color: var(--mid);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  margin-left: 4px;
+  transition: all 0.3s;
+  border-radius: 50%;
+}
+
+.nav-search-btn:hover {
+  color: var(--accent);
+  background: var(--off-white);
 }
 
 .nav-search input {
@@ -2880,4 +2906,50 @@ footer {
     gap: 12px;
     text-align: center;
   }
+}
+
+/* ── NO RESULTS ── */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: var(--mid);
+  animation: fadeIn 0.6s ease both;
+}
+
+.no-results svg {
+  color: var(--accent-light);
+  margin-bottom: 10px;
+}
+
+.no-results p {
+  font-family: var(--serif);
+  font-size: 20px;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.no-results .btn-ghost {
+  margin-top: 10px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--mid);
+  font-family: var(--sans);
+  font-size: 14px;
+}
+
+.no-results .btn-ghost:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

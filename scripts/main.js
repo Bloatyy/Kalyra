@@ -114,6 +114,7 @@ async function loadAllComponents() {
     initFaqAccordion();
     initMobileMenu();
     initMobileSearch();
+    initGlobalSearch();
     initModals();
 
     if (finalIsShopPage) {
@@ -205,7 +206,8 @@ function initShopFilters() {
         categories: [],
         maxPrice: Number.MAX_VALUE,
         style: null,
-        sortBy: 'featured'
+        sortBy: 'featured',
+        searchTerm: ''
     };
 
     const drawer = document.getElementById('filter-drawer');
@@ -253,12 +255,14 @@ function initShopFilters() {
             const cardCategory = card.dataset.category;
             const cardPrice = parseInt(card.dataset.price);
             const cardStyle = card.dataset.style;
+            const cardName = card.querySelector('.product-name').textContent.toLowerCase();
 
             const categoryMatch = filters.categories.length === 0 || filters.categories.includes(cardCategory);
             const priceMatch = (filters.maxPrice === 2000) ? cardPrice >= 2000 : cardPrice <= filters.maxPrice;
             const styleMatch = !filters.style || cardStyle === filters.style;
+            const searchMatch = !filters.searchTerm || cardName.includes(filters.searchTerm.toLowerCase());
 
-            return categoryMatch && priceMatch && styleMatch;
+            return categoryMatch && priceMatch && styleMatch && searchMatch;
         });
 
         // 2. Sort
@@ -270,11 +274,28 @@ function initShopFilters() {
         // 3. Render
         if (cardsContainer) {
             cardsContainer.innerHTML = '';
-            filtered.forEach(card => {
-                card.style.display = 'block';
-                card.style.opacity = '1';
-                cardsContainer.appendChild(card);
-            });
+            if (filtered.length === 0) {
+                cardsContainer.innerHTML = `
+                    <div class="no-results">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                        <p>No treasures found matching your search. Try adjusting your filters or search term.</p>
+                        <button class="btn-ghost" onclick="window.location.href='shop.html'">Clear all filters</button>
+                    </div>
+                `;
+                cardsContainer.style.display = 'block'; // Ensure no-results is centered in grid container if it's a flex/block child
+            } else {
+                cardsContainer.style.display = ''; // Reset to CSS default (grid)
+                filtered.forEach(card => {
+                    card.style.display = 'block';
+                    card.style.opacity = '1';
+                    cardsContainer.appendChild(card);
+                });
+            }
         }
     };
 
@@ -311,34 +332,50 @@ function initShopFilters() {
         applyFiltersAndSort();
     });
 
-    // Initial category from URL
+    // Initial category and search from URL
     const urlParams = new URLSearchParams(window.location.search);
     const initialCat = urlParams.get('category');
+    const initialSearch = urlParams.get('q');
+
     if (initialCat) {
         const target = Array.from(categoryCheckboxes).find(c => c.value === initialCat);
         if (target) {
             target.checked = true;
             filters.categories = [initialCat];
-            applyFiltersAndSort();
         }
+    }
+
+    if (initialSearch) {
+        filters.searchTerm = initialSearch;
+        const desktopInput = document.getElementById('desktop-search-input');
+        const mobileInput = document.getElementById('mobile-search-input');
+        if (desktopInput) desktopInput.value = initialSearch;
+        if (mobileInput) mobileInput.value = initialSearch;
+    }
+
+    if (initialCat || initialSearch) {
+        applyFiltersAndSort();
     }
 }
 
 function initMobileSearch() {
     const trigger = document.getElementById('mobile-search-trigger');
     const dropdown = document.getElementById('mobile-search-dropdown');
-    const closeBtn = document.getElementById('mobile-search-close');
     const input = document.getElementById('mobile-search-input');
 
-    if (!trigger || !dropdown || !closeBtn) return;
+    if (!trigger || !dropdown) return;
 
-    trigger.addEventListener('click', () => {
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
         dropdown.classList.add('active');
         input?.focus();
     });
 
-    closeBtn.addEventListener('click', () => {
-        dropdown.classList.remove('active');
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+            dropdown.classList.remove('active');
+        }
     });
 
     // Close on escape
@@ -496,7 +533,22 @@ function initModals() {
         }
     });
 
-    document.getElementById('btn-to-email')?.addEventListener('click', () => showStep('email'));
+    document.getElementById('btn-to-email')?.addEventListener('click', () => {
+        // Trigger Google Login
+        if (typeof google !== 'undefined') {
+            google.accounts.id.prompt();
+        }
+        showStep('email'); // Still show the step which now has the Google button
+    });
+
+    document.getElementById('btn-google-login')?.addEventListener('click', () => {
+        if (typeof google !== 'undefined') {
+            google.accounts.id.prompt();
+        } else {
+            alert('Google Sign-In is currently unavailable. Please try again later.');
+        }
+    });
+
     document.getElementById('btn-back-to-phone')?.addEventListener('click', () => showStep('phone'));
     document.getElementById('btn-back-to-phone-from-email')?.addEventListener('click', () => showStep('phone'));
 
@@ -505,10 +557,10 @@ function initModals() {
         closeAllModals();
     });
 
-    document.getElementById('btn-email-login')?.addEventListener('click', () => {
-        alert('Logging in with Email & Password...');
-        closeAllModals();
-    });
+    // document.getElementById('btn-email-login')?.addEventListener('click', () => {
+    //     alert('Logging in with Email & Password...');
+    //     closeAllModals();
+    // });
 
     // OTP Input Logic
     const otpDigits = document.querySelectorAll('.otp-digit');
@@ -538,5 +590,100 @@ function initModals() {
     });
 }
 
+// Google OAuth Response Handler
+window.handleGoogleResponse = (response) => {
+    try {
+        // Decode the JWT token (Base64) to get user info
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const user = JSON.parse(jsonPayload);
+        console.log('Google User Authenticated:', user);
+        
+        alert(`Welcome, ${user.name}! You have successfully logged in via Google.`);
+        
+        // Close modal and update UI
+        const loginModal = document.getElementById('login-modal');
+        const loginBackdrop = document.getElementById('login-backdrop');
+        loginModal?.classList.remove('active');
+        loginBackdrop?.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Optional: Store user info or update navbar
+        // localStorage.setItem('user', JSON.stringify(user));
+        
+    } catch (error) {
+        console.error('Error handling Google response:', error);
+        alert('An error occurred during Google Sign-In.');
+    }
+};
+
+function initGlobalSearch() {
+    const desktopInput = document.getElementById('desktop-search-input');
+    const desktopBtn = document.getElementById('desktop-search-btn');
+    const mobileInput = document.getElementById('mobile-search-input');
+    const mobileBtn = document.getElementById('mobile-search-btn');
+
+    const handleSearch = (query) => {
+        if (!query.trim()) return;
+        
+        // Always redirect with query param for consistency
+        window.location.href = `shop.html?q=${encodeURIComponent(query.trim())}`;
+    };
+
+    desktopInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSearch(desktopInput.value);
+    });
+
+    desktopBtn?.addEventListener('click', () => {
+        handleSearch(desktopInput.value);
+    });
+
+    mobileInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSearch(mobileInput.value);
+            document.getElementById('mobile-search-dropdown')?.classList.remove('active');
+        }
+    });
+
+    mobileBtn?.addEventListener('click', () => {
+        handleSearch(mobileInput.value);
+        document.getElementById('mobile-search-dropdown')?.classList.remove('active');
+    });
+}
+
+function initGoogleAuth() {
+    if (typeof google !== 'undefined') {
+        google.accounts.id.initialize({
+            client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // Replace with actual Client ID
+            callback: window.handleGoogleResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true
+        });
+        
+        // Optionally render the official button as well
+        const googleBtnContainer = document.getElementById('btn-google-login');
+        if (googleBtnContainer) {
+            // Uncomment to use official Google button rendering instead of custom
+            /*
+            google.accounts.id.renderButton(googleBtnContainer, {
+                theme: 'outline',
+                size: 'large',
+                width: '100%'
+            });
+            */
+        }
+    } else {
+        console.warn('Google Identity Services script not loaded');
+    }
+}
+
 // Start loading when page is ready
-document.addEventListener('DOMContentLoaded', loadAllComponents);
+document.addEventListener('DOMContentLoaded', () => {
+    loadAllComponents().then(() => {
+        initGoogleAuth();
+    });
+});
