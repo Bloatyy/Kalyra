@@ -1,4 +1,14 @@
 <body>
+<!-- Hidden SVG Filter -->
+<svg style="position: absolute; width: 0; height: 0; pointer-events: none; visibility: hidden; overflow: hidden;" aria-hidden="true">
+  <filter id="remove-black-bg" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="1 0 0 0 0
+                                         0 1 0 0 0
+                                         0 0 1 0 0
+                                         0.33 0.33 0.33 0 -0.1" />
+  </filter>
+</svg>
+
 <div class="nav-mobile-left">
     <div class="nav-mobile-toggle" id="nav-toggle">
         <span></span>
@@ -24,7 +34,7 @@
     </button>
 </div>
 
-<a href="index.html" class="nav-logo"><img src="assets/imgs/logo.png" alt="Kalyra Logo">Kalyra</a>
+<a href="index.html" class="nav-logo"><img src="assets/imgs/logo.png" alt="" width="42" height="42" fetchpriority="high">Kalyra</a>
 
 <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
@@ -43,6 +53,7 @@
             <a href="shop.html?category=bespoke">Bespoke Creations</a>
         </div>
     </li>
+    <li><a href="apparel.html">Apparel</a></li>
     <li><a href="contact.html">Contact</a></li>
     <li><a href="about.html">About Us</a></li>
 </ul>
@@ -78,12 +89,4 @@
         </a>
     </div>
 </div>
-<svg style="visibility: hidden; position: absolute;" width="0" height="0">
-  <filter id="remove-black-bg" color-interpolation-filters="sRGB">
-    <feColorMatrix type="matrix" values="1 0 0 0 0
-                                         0 1 0 0 0
-                                         0 0 1 0 0
-                                         0.33 0.33 0.33 0 -0.1" />
-  </filter>
-</svg>
 </body>

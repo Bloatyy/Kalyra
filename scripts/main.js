@@ -107,6 +107,7 @@ async function loadAllComponents() {
                                 <li><a href="shop.html?category=wearable">Wearable Collection</a></li>
                             </ul>
                         </li>
+                        <li><a href="apparel.html">Apparel</a></li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
@@ -685,7 +686,7 @@ async function initProductPage() {
         const container = document.getElementById('product-page-content');
         if (!container) return;
         
-        const product = CATALOG.find(p => p.id === productId);
+        const product = CATALOG.find(p => p.id === productId) || generateApparelItems().find(p => p.id === productId);
         
         if (!product) {
             container.innerHTML = `
@@ -714,15 +715,21 @@ function renderPDP(container, product) {
     document.title = `${product.name} — Kalyra Boutique`;
     
     // Related products (prioritize same category)
-    let related = CATALOG.filter(p => p.category === product.category && p.id !== product.id);
+    const isApparel = product.category === 'apparel';
+    let related;
     
-    // If fewer than 4 items, fill up with other products to maintain a full grid
-    if (related.length < 4) {
-        const others = CATALOG.filter(p => p.category !== product.category && p.id !== product.id);
-        const needed = 4 - related.length;
-        related = [...related, ...others.slice(0, needed)];
+    if (isApparel) {
+        related = generateApparelItems().filter(p => p.id !== product.id).slice(0, 4);
     } else {
-        related = related.slice(0, 4);
+        related = CATALOG.filter(p => p.category === product.category && p.id !== product.id);
+        // If fewer than 4 items, fill up with other products to maintain a full grid
+        if (related.length < 4) {
+            const others = CATALOG.filter(p => p.category !== product.category && p.id !== product.id);
+            const needed = 4 - related.length;
+            related = [...related, ...others.slice(0, needed)];
+        } else {
+            related = related.slice(0, 4);
+        }
     }
     
     container.innerHTML = `
@@ -824,8 +831,8 @@ function renderPDP(container, product) {
             
             <section class="related-section">
                 <div class="section-header-centered">
-                    <div class="section-label">You might also love</div>
-                    <h2 class="section-title">Similar <em>Treasures</em></h2>
+                    <div class="section-label">${isApparel ? 'Complete the look' : 'You might also love'}</div>
+                    <h2 class="section-title">${isApparel ? 'Style <em>Companions</em>' : 'Similar <em>Treasures</em>'}</h2>
                 </div>
                 <div class="products-grid grid-4" id="similar-products-grid">
                     ${related.map(r => `
@@ -840,6 +847,10 @@ function renderPDP(container, product) {
                     `).join('')}
                 </div>
             </section>
+        </div>
+
+        <div class="pdp-copyright" style="text-align: center; font-size: 13px; color: var(--muted); padding: 60px 0 20px; border-top: 1px solid var(--border-light); margin-top: 80px;">
+            &copy; 2026 Kalyra Studio. All rights reserved.
         </div>
 
         <div class="pdp-lightbox" id="pdp-lightbox">
@@ -1256,9 +1267,115 @@ function initGoogleAuth() {
     }
 }
 
+// ── APPAREL SECTION LOGIC ──
+
+const APPAREL_CONFIG = {
+    names: ["Beads Embroidery Piece", "Streetwear Tee", "Floral Kurta Set", "Embroidered Co-ord Set"],
+    statuses: [
+        { label: "Ready to Ship", class: "ready", btn: "Add to Cart" },
+        { label: "Limited Stock", class: "limited", btn: "Buy Now" },
+        { label: "Restocking Soon", class: "sold-out", btn: "Notify Me" },
+        { label: "Pre-Order Open", class: "pre-order", btn: "Pre-Order Now" },
+        { label: "Bulk Orders Available", class: "bulk", btn: "Buy Now" }
+    ],
+    tags: ["Best Seller", "Signature Piece", "New Drop", "Trending Now", "Limited Edition", "Premium Choice", "Editor's Pick"]
+};
+
+// Global store for generated apparel
+let PERSISTED_APPAREL = null;
+
+function generateApparelItems() {
+    if (PERSISTED_APPAREL) return PERSISTED_APPAREL;
+
+    PERSISTED_APPAREL = Array.from({ length: 12 }, (_, i) => {
+        const name = APPAREL_CONFIG.names[Math.floor(Math.random() * APPAREL_CONFIG.names.length)];
+        const price = Math.floor(Math.random() * (2999 - 699) + 699);
+        const status = APPAREL_CONFIG.statuses[Math.floor(Math.random() * APPAREL_CONFIG.statuses.length)];
+        const tag = APPAREL_CONFIG.tags[Math.floor(Math.random() * APPAREL_CONFIG.tags.length)];
+        
+        return { 
+            id: `apparel-${i}`, 
+            name, 
+            price, 
+            status, 
+            tag,
+            category: "apparel",
+            img: "https://placehold.co/600x800/F5F0E8/8C7E72?text=Apparel+Preview",
+            description: "An exclusive piece from our handcrafted Apparel collection. This garment blends traditional decorative embroidery with modern, minimal silhouettes for a truly premium feel."
+        };
+    });
+    return PERSISTED_APPAREL;
+}
+
+function initApparelPage() {
+    console.log('Initializing Apparel Page...');
+    const container = document.getElementById('apparel-products-grid');
+    if (!container) return;
+
+    const apparelItems = generateApparelItems();
+
+    container.innerHTML = '';
+    apparelItems.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'product-card apparel-card shop-card-animate';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.style.cursor = 'pointer';
+        
+        card.innerHTML = `
+            <div class="product-img-wrap">
+                <div class="placeholder-img">Apparel Image</div>
+                <div class="product-badge-container">
+                    <span class="status-badge ${item.status.class}">${item.status.label}</span>
+                </div>
+                <div class="product-add">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+            </div>
+            <div class="product-info-minimal">
+                <span class="premium-tag">${item.tag}</span>
+                <h3 class="product-name">${item.name}</h3>
+                <p class="product-price">₹${item.price.toLocaleString()}</p>
+            </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.btn-apparel')) {
+                window.location.href = `product.html?id=${item.id}`;
+            }
+        });
+        
+        container.appendChild(card);
+    });
+
+    // View Toggles logic for Apparel
+    const viewBtns = document.querySelectorAll('.view-btn');
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const view = btn.dataset.view;
+            viewBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (container) {
+                container.className = `products-grid ${view}`;
+            }
+        });
+    });
+}
+
 // Start loading when page is ready
 document.addEventListener('DOMContentLoaded', () => {
     loadAllComponents().then(() => {
         initGoogleAuth();
+        
+        // Final check for page types
+        const path = window.location.pathname;
+        const isApparelPage = path.includes('apparel.html');
+        const isProductPage = path.includes('product.html');
+        const isShopPage = path.includes('shop.html');
+        
+        if (isApparelPage) initApparelPage();
+        if (isProductPage) initProductPage();
+        if (isShopPage) initShopFilters();
     });
 });
+
