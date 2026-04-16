@@ -840,14 +840,6 @@ function renderPDP(container, product) {
                     `).join('')}
                 </div>
             </section>
-            
-            <div class="pdp-sticky-bar" id="pdp-sticky-bar">
-                <div class="sticky-info">
-                    <div class="sticky-name">${product.name}</div>
-                    <div class="sticky-price">₹${product.price.toLocaleString()}</div>
-                </div>
-                <button class="btn-sticky-add" id="pdp-sticky-add">Add to Cart</button>
-            </div>
         </div>
 
         <div class="pdp-lightbox" id="pdp-lightbox">
@@ -936,26 +928,6 @@ function renderPDP(container, product) {
         setTimeout(() => lbImg.src = mainImg.src, 50);
     });
 
-    // Sticky bar visibility logic
-    const stickyBar = document.getElementById('pdp-sticky-bar');
-    const mainAction = document.getElementById('pdp-add-cart');
-    
-    if (stickyBar && mainAction) {
-        window.addEventListener('scroll', () => {
-            const rect = mainAction.getBoundingClientRect();
-            if (rect.bottom < 0) {
-                stickyBar.classList.add('visible');
-            } else {
-                stickyBar.classList.remove('visible');
-            }
-        });
-        
-        document.getElementById('pdp-sticky-add')?.addEventListener('click', () => {
-            mainAction.click();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-    
     // Interactions
     document.querySelectorAll('.accordion-trigger').forEach(btn => {
         btn.addEventListener('click', () => {
