@@ -1410,6 +1410,7 @@ function initGoogleAuth() {
 
 const APPAREL_CONFIG = {
     names: ["Beads Embroidery Piece", "Streetwear Tee", "Floral Kurta Set", "Embroidered Co-ord Set"],
+    categories: ["Curated Embroidery", "Modern Streetwear", "Ethnic Ensemble"],
     statuses: [
         { label: "Ready to Ship", class: "ready", btn: "Add to Cart" },
         { label: "Limited Stock", class: "limited", btn: "Buy Now" },
@@ -1428,7 +1429,8 @@ function generateApparelItems() {
 
     PERSISTED_APPAREL = Array.from({ length: 12 }, (_, i) => {
         const name = APPAREL_CONFIG.names[Math.floor(Math.random() * APPAREL_CONFIG.names.length)];
-        const price = Math.floor(Math.random() * (2999 - 699) + 699);
+        const category = APPAREL_CONFIG.categories[Math.floor(Math.random() * APPAREL_CONFIG.categories.length)];
+        const price = Math.floor(Math.random() * (8999 - 1499) + 1499);
         const status = APPAREL_CONFIG.statuses[Math.floor(Math.random() * APPAREL_CONFIG.statuses.length)];
         const tag = APPAREL_CONFIG.tags[Math.floor(Math.random() * APPAREL_CONFIG.tags.length)];
         
@@ -1438,7 +1440,7 @@ function generateApparelItems() {
             price, 
             status, 
             tag,
-            category: "apparel",
+            category,
             img: "https://placehold.co/600x800/F5F0E8/8C7E72?text=Apparel+Preview",
             description: "An exclusive piece from our handcrafted Apparel collection. This garment blends traditional decorative embroidery with modern, minimal silhouettes for a truly premium feel."
         };
@@ -1447,56 +1449,155 @@ function generateApparelItems() {
 }
 
 function initApparelPage() {
-    console.log('Initializing Apparel Page...');
+    console.log('Initializing Apparel Page with Filters...');
     const container = document.getElementById('apparel-products-grid');
     if (!container) return;
 
     const apparelItems = generateApparelItems();
+    const filters = {
+        categories: [],
+        maxPrice: Number.MAX_VALUE,
+        style: null,
+        sortBy: 'featured'
+    };
 
-    container.innerHTML = '';
-    apparelItems.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'product-card apparel-card shop-card-animate';
-        card.style.animationDelay = `${index * 0.05}s`;
-        card.style.cursor = 'pointer';
-        
-        card.innerHTML = `
-            <div class="product-img-wrap">
-                <div class="placeholder-img">Apparel Image</div>
-                <div class="product-badge-container">
-                    <span class="status-badge ${item.status.class}">${item.status.label}</span>
-                </div>
-                <div class="product-add">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                </div>
-            </div>
-            <div class="product-info-minimal">
-                <span class="premium-tag">${item.tag}</span>
-                <h3 class="product-name">${item.name}</h3>
-                <p class="product-price">₹${item.price.toLocaleString()}</p>
-            </div>
-        `;
+    const renderItems = (items) => {
+        container.innerHTML = '';
+        if (items.length === 0) {
+            container.innerHTML = `
+                <div class="no-results" style="grid-column: 1/-1; padding: 100px 0;">
+                    <p>No apparel found matching your filters. Try adjusting them.</p>
+                </div>`;
+            return [];
+        }
 
-        card.addEventListener('click', (e) => {
-            if (!e.target.closest('.btn-apparel')) {
+        return items.map((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'product-card apparel-card shop-card-animate';
+            card.style.animationDelay = `${index * 0.05}s`;
+            card.style.cursor = 'pointer';
+            
+            // Add Data Attributes for filtering
+            card.dataset.category = item.category;
+            card.dataset.price = item.price;
+            card.dataset.tag = item.tag;
+
+            card.innerHTML = `
+                <div class="product-img-wrap">
+                    <div class="placeholder-img">Apparel Image</div>
+                    <div class="product-badge-container">
+                        <span class="status-badge ${item.status.class}">${item.status.label}</span>
+                    </div>
+                    <div class="product-add">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                </div>
+                <div class="product-info-minimal">
+                    <span class="premium-tag">${item.tag}</span>
+                    <h3 class="product-name">${item.name}</h3>
+                    <p class="product-price">₹${item.price.toLocaleString()}</p>
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
                 window.location.href = `product.html?id=${item.id}`;
-            }
+            });
+            
+            container.appendChild(card);
+            return card;
         });
-        
-        container.appendChild(card);
+    };
+
+    let allCards = renderItems(apparelItems);
+
+    const applyFiltersAndSort = () => {
+        let filtered = [...apparelItems];
+
+        // 1. Filter
+        filtered = filtered.filter(item => {
+            const categoryMatch = filters.categories.length === 0 || filters.categories.includes(item.category);
+            const priceMatch = (filters.isPremiumPrice) ? item.price >= filters.maxPrice : item.price <= filters.maxPrice;
+            const styleMatch = !filters.style || item.tag === filters.style;
+
+            return categoryMatch && priceMatch && styleMatch;
+        });
+
+        // 2. Sort
+        if (filters.sortBy === 'price-low') filtered.sort((a, b) => a.price - b.price);
+        if (filters.sortBy === 'price-high') filtered.sort((a, b) => b.price - a.price);
+        if (filters.sortBy === 'alphabet-az') filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+        // 3. Render
+        renderItems(filtered);
+    };
+
+    // Initialize UI Triggers
+    const drawer = document.getElementById('filter-drawer');
+    const overlay = document.getElementById('filter-overlay');
+    const toggleBtn = document.getElementById('filter-toggle');
+    const closeBtn = document.getElementById('filter-close');
+    const applyBtn = document.getElementById('apply-filters');
+    const sortDropdown = document.getElementById('sort-dropdown');
+
+    const toggleDrawer = () => {
+        drawer?.classList.toggle('active');
+        overlay?.classList.toggle('active');
+        document.body.style.overflow = drawer?.classList.contains('active') ? 'hidden' : '';
+    };
+
+    toggleBtn?.addEventListener('click', toggleDrawer);
+    closeBtn?.addEventListener('click', toggleDrawer);
+    overlay?.addEventListener('click', toggleDrawer);
+    applyBtn?.addEventListener('click', toggleDrawer);
+
+    // Filter Listeners
+    document.querySelectorAll('input[name="apparel-cat"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            filters.categories = Array.from(document.querySelectorAll('input[name="apparel-cat"]:checked')).map(c => c.value);
+            applyFiltersAndSort();
+        });
     });
 
-    // View Toggles logic for Apparel
+    document.querySelectorAll('input[name="price"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const val = radio.value;
+            if (val.includes('+')) {
+                filters.maxPrice = 8000;
+                filters.isPremiumPrice = true;
+            } else {
+                filters.maxPrice = parseInt(val);
+                filters.isPremiumPrice = false;
+            }
+            applyFiltersAndSort();
+        });
+    });
+
+    document.querySelectorAll('.style-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            document.querySelectorAll('.style-tag').forEach(t => t.classList.remove('active'));
+            if (filters.style === tag.textContent) {
+                filters.style = null;
+            } else {
+                filters.style = tag.textContent;
+                tag.classList.add('active');
+            }
+            applyFiltersAndSort();
+        });
+    });
+
+    sortDropdown?.addEventListener('change', (e) => {
+        filters.sortBy = e.target.value;
+        applyFiltersAndSort();
+    });
+
+    // View Toggles
     const viewBtns = document.querySelectorAll('.view-btn');
     viewBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const view = btn.dataset.view;
             viewBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            if (container) {
-                container.className = `products-grid ${view}`;
-            }
+            if (container) container.className = `products-grid ${view}`;
         });
     });
 }
