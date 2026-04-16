@@ -216,6 +216,7 @@ nav.scrolled {
   width: 160px;
   flex-shrink: 1;
   min-width: 120px;
+  position: relative;
 }
 
 .nav-search:focus-within {
@@ -255,6 +256,113 @@ nav.scrolled {
 
 .nav-search input::placeholder {
   color: var(--muted);
+}
+
+/* ── SEARCH AUTOCOMPLETE ── */
+.search-autocomplete {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  width: 420px;
+  background: var(--pure-white);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(58, 48, 43, 0.12);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  z-index: 1000;
+}
+
+.search-autocomplete.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  transition: background 0.2s;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover {
+  background: var(--off-white);
+}
+
+.autocomplete-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--beige);
+}
+
+.autocomplete-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.autocomplete-name {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--deep);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.autocomplete-price {
+  font-size: 13px;
+  color: var(--mid);
+}
+
+.autocomplete-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.autocomplete-empty svg {
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+/* Mobile adjustments for autocomplete */
+@media (max-width: 768px) {
+  .search-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 0 0 12px 12px;
+    border-top: none;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    transform: translateY(0) !important; /* Force override centering transform */
+  }
+
+  .search-autocomplete.active {
+    transform: translateY(0) !important;
+  }
+  
+  .autocomplete-item {
+    padding: 16px; /* Larger tap target */
+  }
 }
 
 .nav-icon {

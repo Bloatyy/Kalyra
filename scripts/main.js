@@ -1,22 +1,44 @@
-// Global Catalog Data
-const CATALOG = [
-    { id: "boho-tote", name: "Boho Embroidery Tote", img: "assets/anklet-embroidery-tote.jpg", category: "wearable", style: "Love & Aesthetic", price: 1499, description: "A beautifully handcrafted tote bag featuring intricate boho embroidery. Perfect for carrying your essentials with a touch of artistic flair." },
-    { id: "midnight-nameplate", name: "Midnight Resin Nameplate", img: "assets/black-resin-name-plate.jpg", category: "bespoke", style: "Bold & Expressive", price: 2499, description: "An elegant midnight black resin nameplate with golden accents. A bold statement piece for your modern home entrance." },
-    { id: "ceo-nameplate", name: "Executive CEO Nameplate", img: "assets/ceo-resin-name-plate.jpg", category: "bespoke", style: "Professional", price: 2999, description: "A premium nameplate designed for high-end professional spaces. Crafted with crystal clear resin and metallic typography." },
-    { id: "doctor-nameplate", name: "Medical Professional Nameplate", img: "assets/doctor-resin-name-plate.jpg", category: "bespoke", style: "Professional", price: 2799, description: "Specifically tailored for medical professionals, blending elegance with authority. Features custom clinical iconography." },
-    { id: "floral-mosaic", name: "Floral Gem Mosaic", img: "assets/floral-gem-art.jpg", category: "artistry", style: "Bold & Expressive", price: 3499, description: "A mesmerizing mosaic of floral gems preserved in high-quality resin. Each piece is a unique window into nature's beauty." },
-    { id: "spring-coasters", name: "Spring Blossom Coasters", img: "assets/floral-resin-coasters.jpg", category: "living", style: "Calm & Minimal", price: 899, description: "Set of 4 coasters featuring delicate spring blossoms. Add a touch of garden freshness to your coffee table." },
-    { id: "petal-coasters", name: "Botanical Petal Coasters", img: "assets/flower-shaped-resin-coasters.jpg", category: "living", style: "Love & Aesthetic", price: 999, description: "Exotic flower-shaped coasters with real pressed petals. A lovely conversation piece for any gathering." },
-    { id: "divine-mandala", name: "Divine Harmony Mandala", img: "assets/mandala-art-sketchbook.jpg", category: "mandala", style: "Spiritual Mandala", price: 1999, description: "Intricately detailed mandala art that brings spiritual calm and focus to your workspace or living area." },
-    { id: "butterfly-mirror", name: "Ethereal Butterfly Mirror Art", img: "assets/mirror-butterfly-art.jpg", category: "mandala", style: "Spiritual Mandala", price: 4299, description: "A stunning mirror artwork featuring ethereal butterflies in a mandala-style arrangement. Reflects light and beauty." },
-    { id: "horse-portrait", name: "Majestic Horse Portrait", img: "assets/mirror-horse-portrait.jpg", category: "artistry", style: "Bold & Expressive", price: 5999, description: "A powerful horse portrait rendered on a mirrored surface with intricate detailing. A true masterpiece for collectors." },
-    { id: "ocean-keychain", name: "Azure Ocean Keychain", img: "assets/ocean-keychain-sakshi.jpg", category: "bespoke", style: "Love & Aesthetic", price: 499, description: "A small piece of the ocean in your pocket. Handcrafted resin keychain with azure waves and sandy shores." },
-    { id: "pearl-portrait", name: "Lady in Pearls Portrait", img: "assets/pearl-hat-portrait.jpg", category: "artistry", style: "Love & Aesthetic", price: 4899, description: "An elegant portrait of a lady adorned with real pearl accents. Blends traditional portraiture with modern resin art." },
-    { id: "golden-coasters", name: "Golden Shore Resin Coasters", img: "assets/resin-coasters-gold.jpg", category: "living", style: "Calm & Minimal", price: 1299, description: "Luxury coasters inspired by golden sunlit shores. Features real gold leaf flakes suspended in premium resin." },
-    { id: "shah-nameplate", name: "Elegant Family Nameplate", img: "assets/resin-name-plate-shah.jpg", category: "bespoke", style: "Bold & Expressive", price: 2699, description: "A personalized family nameplate that celebrates your home's legacy with artistic resin layers and deep colors." },
-    { id: "sunflower-tote", name: "Sun-Kissed Sunflower Tote", img: "assets/sunflower-tote.jpg", category: "wearable", style: "Love & Aesthetic", price: 1399, description: "Brighten your day with this sunflower-themed tote. Durable material meets vibrant, hand-painted floral art." },
-    { id: "wedding-plate", name: "Eternal Vows Wedding Plate", img: "assets/wedding-resin-plate.jpg", category: "bespoke", style: "Spiritual Mandala", price: 3899, description: "Commerative wedding plate to preserve your eternal vows. A timeless keepsake featuring personalized details." }
-];
+// The CATALOG is now managed in scripts/catalog.js to keep this logic file clean.
+function generateApparelItems() {
+    return [
+        {
+            id: 'beade-kurta',
+            name: 'Cream Beads Embroidery Kurta Set',
+            category: 'apparel',
+            tag: 'New Collection',
+            price: 4999,
+            img: 'assets/beade-embrodery-kurta-set.jpg',
+            description: 'Handcrafted cream kurta featuring intricate beadwork embroidery. Minimalist and premium.'
+        },
+        {
+            id: 'butterfly-kurta',
+            name: 'Butterfly Motif Kurta',
+            category: 'apparel',
+            tag: 'Limited Edition',
+            price: 5499,
+            img: 'assets/butterfly-kurta.jpg',
+            description: 'Modern silhouette with a delicate butterfly motif. Perfect for festive occasions.'
+        },
+        {
+            id: 'ethnic-set',
+            name: 'Artisan Ethnic Ensemble',
+            category: 'apparel',
+            tag: 'Best Seller',
+            price: 6299,
+            img: 'assets/ethnic-piece-kurta.jpg',
+            description: 'A complete artisan-crafted ethnic set with detailed thread work.'
+        },
+        {
+            id: 'streetwear-hoodie',
+            name: 'Urban Streetwear Hoodie',
+            category: 'apparel',
+            tag: 'Exclusive',
+            price: 3299,
+            img: 'assets/streetwear-hoodie.jpg',
+            description: 'Modern oversized fit hoodie with bespoke embroidery accents.'
+        }
+    ];
+}
 
 // Component Loading System
 const components = {
@@ -34,21 +56,28 @@ async function loadComponent(elementId, filePath) {
     const element = document.getElementById(elementId);
     if (!element) return false;
 
-    // Skip loading if already has substantial inlined content
-    if (element.children.length > 0 || element.innerText.trim().length > 100) {
+    // Skip loading if already has substantial inlined content, unless it's a loading placeholder
+    const isLoader = element.querySelector('.product-loading') || element.querySelector('.loader');
+    if (!isLoader && (element.children.length > 0 || element.innerText.trim().length > 100)) {
         return true;
     }
 
     try {
-        // Cache-busting only for web protocols (http/https) to prevent failures on file://
-        const isWeb = window.location.protocol.startsWith('http');
-        const cacheBuster = isWeb ? `?t=${new Date().getTime()}` : '';
-
-        const response = await fetch(filePath + cacheBuster);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch(filePath);
+        if (!response.ok) {
+            console.warn(`Fetch to ${filePath} failed, trying absolute path...`);
+            const currentDir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const fullPath = currentDir + filePath;
+            const res2 = await fetch(fullPath);
+            if (!res2.ok) throw new Error(`HTTP error! status: ${res2.status}`);
+            const html = await res2.text();
+            element.innerHTML = html;
+            return true;
+        }
 
         const html = await response.text();
         element.innerHTML = html;
+        console.log(`Injected ${elementId}, html length: ${html.length}, grid found: ${!!element.querySelector('#shop-items-container') || !!element.querySelector('.products-grid')}`);
         return true;
     } catch (error) {
         console.error(`Error loading ${filePath}:`, error);
@@ -57,10 +86,9 @@ async function loadComponent(elementId, filePath) {
 }
 
 async function loadAllComponents() {
-    // Robust check for shop page
-    const isShopPage = window.location.pathname.endsWith('shop.html') || window.location.pathname.endsWith('shop') || window.location.pathname.includes('/shop/');
+    const isShopPage = window.location.href.toLowerCase().includes('shop.html') || !!document.getElementById('shop-items-container');
 
-    console.log('Initial Shop Page Check:', { pathname: window.location.pathname, isShopPage });
+    console.log('Loading components...', { pathname: window.location.pathname, isShopPage });
 
     const loadPromises = Object.keys(components).map(id => {
         let path = components[id];
@@ -74,9 +102,9 @@ async function loadAllComponents() {
 
     // Recalculate isShopPage after components are loaded into the DOM
     const shopGridExists = !!document.getElementById('shop-products-grid');
-    const finalIsShopPage = window.location.pathname.includes('shop.html') || shopGridExists;
+    const finalIsShopPage = isShopPage || shopGridExists;
 
-    console.log('Final Shop Page Check:', { finalIsShopPage, shopGridExists });
+    console.log('Components loaded.', { finalIsShopPage, shopGridExists });
 
     if (document.getElementById('gallery-strip')) {
         await loadGalleryStrip();
@@ -141,8 +169,12 @@ async function loadAllComponents() {
         console.log('Detected Shop Page, initializing filters...');
         // Use a more robust check for DOM readiness
         const waitForGrid = (retries = 0) => {
-            const grid = document.getElementById('shop-products-grid');
+            let grid = document.getElementById('shop-items-container');
+            // Check within the #shop container specifically if global ID lookup fails
+            if (!grid) grid = document.getElementById('shop')?.querySelector('#shop-items-container') || document.getElementById('shop')?.querySelector('.products-grid');
+            
             if (grid) {
+                if (grid.id !== 'shop-items-container') grid.id = 'shop-items-container'; // Ensure ID for later use
                 initShopFilters();
             } else if (retries < 10) {
                 console.log(`Waiting for grid... retry ${retries + 1}`);
@@ -166,60 +198,69 @@ async function loadAllComponents() {
 
 function initShopFilters() {
     console.log('Initializing Shop Filters...');
-    // Use the global CATALOG array instead of local products array
-    const products = CATALOG;
+    let cardsContainer = document.getElementById('shop-items-container');
 
-    let cardsContainer = document.getElementById('shop-products-grid');
-
-    // Fallback/Retry logic for slow DOM injection
     if (!cardsContainer) {
-        console.warn('Shop grid not foundn immediately, retrying...');
-        // We'll proceed if possible, but the caller (setTimeout) handles the main wait
+        cardsContainer = document.querySelector('.products-grid');
+        if (cardsContainer) cardsContainer.id = 'shop-items-container';
     }
 
     if (!cardsContainer) {
-        console.error('Shop Products Grid container not found in DOM.');
+        console.error('Shop container not found.');
         return;
     }
 
-    // 1. Render all products with random prices
-    console.log(`Rendering ${products.length} products...`);
-    cardsContainer.innerHTML = '';
-    const renderedCards = products.map((p, index) => {
-        const price = p.price; // Use price from catalog
-        const imgSrc = p.img;
-        const card = document.createElement('div');
-        // Make card clickable
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', (e) => {
-            // Only redirect if NOT clicking the add to cart button
-            if (!e.target.closest('.product-add')) {
-                window.location.href = `product.html?id=${p.id}`;
-            }
+    // 1. Data Source Selection: Prefer HTML if available
+    let products = [];
+    const htmlCards = Array.from(cardsContainer.querySelectorAll('.product-card'));
+    
+    if (htmlCards.length > 0) {
+        console.log(`Found ${htmlCards.length} products already in HTML. parsing metadata...`);
+        products = htmlCards.map(card => {
+            return {
+                id: card.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]?.split('=')?.[1] || 'generic',
+                name: card.querySelector('.product-name')?.innerText || 'Product',
+                category: card.dataset.category || 'all',
+                price: parseInt(card.dataset.price) || 0,
+                style: card.dataset.style || 'all',
+                img: card.querySelector('img')?.src || '',
+                element: card // Store the element to show/hide instead of re-rendering
+            };
         });
-        // Do NOT use 'reveal' class — IntersectionObserver is async and misses
-        // elements already in the viewport, leaving them stuck at opacity:0.
-        // Instead, use a direct staggered CSS animation.
-        card.className = 'product-card shop-card-animate';
-        card.style.animationDelay = `${index * 0.05}s`;
-        card.dataset.category = p.category;
-        card.dataset.price = price;
-        card.dataset.style = p.style;
+    } else {
+        products = window.CATALOG || [];
+        console.log(`No HTML cards found, using global catalog (${products.length} items)`);
+    }
 
-        card.innerHTML = `
-            <div class="product-img-wrap">
-                <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/400x500/F5F0E8/8C7E72?text=Coming+Soon';">
-                <div class="product-add">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    if (products.length === 0) {
+        console.warn('No products found to display.');
+        return;
+    }
+
+    // 2. Initial Rendering (only if using dynamic data)
+    if (htmlCards.length === 0) {
+        cardsContainer.innerHTML = '';
+        products = products.map((p, index) => {
+            const card = document.createElement('div');
+            card.className = 'product-card shop-card-animate';
+            card.style.animationDelay = `${index * 0.05}s`;
+            card.dataset.category = p.category;
+            card.dataset.price = p.price;
+            card.dataset.style = p.style;
+            card.innerHTML = `
+                <div class="product-img-wrap">
+                    <img src="${p.img}" alt="${p.name}" loading="lazy">
+                    <div class="product-add"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
                 </div>
-            </div>
-            <div class="product-brand">${p.category.charAt(0).toUpperCase() + p.category.slice(1)} Collection</div>
-            <h3 class="product-name">${p.name}</h3>
-            <p class="product-price">₹${price.toLocaleString()}</p>
-        `;
-        cardsContainer.appendChild(card);
-        return card;
-    });
+                <div class="product-brand">${p.category}</div>
+                <h3 class="product-name">${p.name}</h3>
+                <p class="product-price">₹${p.price.toLocaleString()}</p>
+            `;
+            card.onclick = () => window.location.href = `product.html?id=${p.id}`;
+            cardsContainer.appendChild(card);
+            return { ...p, element: card };
+        });
+    }
 
     console.log('Products rendered successfully.');
 
@@ -249,7 +290,7 @@ function initShopFilters() {
     overlay?.addEventListener('click', toggleDrawer);
     applyBtn?.addEventListener('click', toggleDrawer);
 
-    const initialCards = renderedCards;
+    const initialCards = products.map(p => p.element);
     const categoryCheckboxes = document.querySelectorAll('input[name="category"]');
     const priceRadios = document.querySelectorAll('input[name="price"]');
     const styleTags = document.querySelectorAll('.style-tag');
@@ -647,32 +688,119 @@ function initGlobalSearch() {
     const desktopBtn = document.getElementById('desktop-search-btn');
     const mobileInput = document.getElementById('mobile-search-input');
     const mobileBtn = document.getElementById('mobile-search-btn');
+    const mobileDropdown = document.getElementById('mobile-search-dropdown');
+
+    // Create Autocomplete Containers if they don't exist
+    let desktopAutocomplete = document.getElementById('desktop-autocomplete');
+    if (!desktopAutocomplete && desktopInput) {
+        desktopAutocomplete = document.createElement('div');
+        desktopAutocomplete.id = 'desktop-autocomplete';
+        desktopAutocomplete.className = 'search-autocomplete';
+        desktopInput.parentElement?.appendChild(desktopAutocomplete);
+    }
+
+    let mobileAutocomplete = document.getElementById('mobile-autocomplete');
+    if (!mobileAutocomplete && mobileInput) {
+        mobileAutocomplete = document.createElement('div');
+        mobileAutocomplete.id = 'mobile-autocomplete';
+        mobileAutocomplete.className = 'search-autocomplete';
+        mobileDropdown?.appendChild(mobileAutocomplete);
+    }
+
+    const getAllProducts = () => {
+        const catalog = window.CATALOG || [];
+        const apparel = typeof generateApparelItems === 'function' ? generateApparelItems() : [];
+        return [...catalog, ...apparel];
+    };
 
     const handleSearch = (query) => {
         if (!query.trim()) return;
-        
-        // Always redirect with query param for consistency
         window.location.href = `shop.html?q=${encodeURIComponent(query.trim())}`;
     };
 
-    desktopInput?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSearch(desktopInput.value);
-    });
+    const renderAutocomplete = (input, container) => {
+        const query = input.value.trim().toLowerCase();
+        
+        if (query.length < 2) {
+            container.classList.remove('active');
+            container.innerHTML = '';
+            return;
+        }
 
+        const products = getAllProducts();
+        const matches = products.filter(p => 
+            p.name.toLowerCase().includes(query) || 
+            (p.category && p.category.toLowerCase().includes(query))
+        ).slice(0, 6);
+
+        if (matches.length === 0) {
+            container.innerHTML = `
+                <div class="autocomplete-empty">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px; opacity: 0.5;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <p style="margin: 0; font-size: 13px;">No results found</p>
+                </div>`;
+        } else {
+            container.innerHTML = matches.map(p => `
+                <div class="autocomplete-item" onclick="window.location.href='product.html?id=${p.id}'">
+                    <img src="${p.img}" alt="${p.name}" class="autocomplete-img" onerror="this.src='https://placehold.co/48x48/F5F0E8/8C7E72?text=Item'">
+                    <div class="autocomplete-info">
+                        <span class="autocomplete-name">${p.name}</span>
+                        <span class="autocomplete-price">₹${p.price.toLocaleString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        container.classList.add('active');
+    };
+
+    // Desktop Events
+    desktopInput?.addEventListener('input', () => renderAutocomplete(desktopInput, desktopAutocomplete));
+    desktopInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSearch(desktopInput.value);
+            desktopAutocomplete?.classList.remove('active');
+        }
+    });
     desktopBtn?.addEventListener('click', () => {
         handleSearch(desktopInput.value);
+        desktopAutocomplete?.classList.remove('active');
     });
 
+    // Mobile Events
+    mobileInput?.addEventListener('input', () => renderAutocomplete(mobileInput, mobileAutocomplete));
     mobileInput?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handleSearch(mobileInput.value);
-            document.getElementById('mobile-search-dropdown')?.classList.remove('active');
+            mobileDropdown?.classList.remove('active');
+            mobileAutocomplete?.classList.remove('active');
+        }
+    });
+    mobileBtn?.addEventListener('click', () => {
+        handleSearch(mobileInput.value);
+        mobileDropdown?.classList.remove('active');
+        mobileAutocomplete?.classList.remove('active');
+    });
+
+    // Close on click outside or escape
+    document.addEventListener('click', (e) => {
+        if (!desktopInput?.contains(e.target) && !desktopAutocomplete?.contains(e.target)) {
+            desktopAutocomplete?.classList.remove('active');
+        }
+        if (!mobileInput?.contains(e.target) && !mobileAutocomplete?.contains(e.target)) {
+            mobileAutocomplete?.classList.remove('active');
         }
     });
 
-    mobileBtn?.addEventListener('click', () => {
-        handleSearch(mobileInput.value);
-        document.getElementById('mobile-search-dropdown')?.classList.remove('active');
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            desktopAutocomplete?.classList.remove('active');
+            mobileAutocomplete?.classList.remove('active');
+            mobileDropdown?.classList.remove('active');
+        }
     });
 }
 
@@ -681,12 +809,26 @@ async function initProductPage() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
-        console.log('Product ID from URL:', productId);
+        
+        // Smart Search: Check Catalog -> Check Apparel -> Check URL Params
+        let product = (window.CATALOG || []).find(p => p.id === productId) || 
+                      generateApparelItems().find(p => p.id === productId);
+
+        // Fallback: If not in catalog, try to build from URL parameters
+        if (!product && urlParams.get('name')) {
+            console.log('Product not found in catalog, generating from URL parameters...');
+            product = {
+                id: productId || 'custom-item',
+                name: urlParams.get('name'),
+                price: parseInt(urlParams.get('price')) || 0,
+                img: urlParams.get('img') || 'https://placehold.co/600x800/F5F0E8/8C7E72?text=Product',
+                category: urlParams.get('cat') || 'Bespoke Creations',
+                description: urlParams.get('desc') || 'A unique handcrafted piece from the Kalyra collection.'
+            };
+        }
         
         const container = document.getElementById('product-page-content');
         if (!container) return;
-        
-        const product = CATALOG.find(p => p.id === productId) || generateApparelItems().find(p => p.id === productId);
         
         if (!product) {
             container.innerHTML = `
@@ -699,10 +841,7 @@ async function initProductPage() {
             return;
         }
         
-        // Render content
         renderPDP(container, product);
-        
-        // Re-init reveal for newly added elements
         initScrollReveal();
         
     } catch (error) {
@@ -721,10 +860,10 @@ function renderPDP(container, product) {
     if (isApparel) {
         related = generateApparelItems().filter(p => p.id !== product.id).slice(0, 4);
     } else {
-        related = CATALOG.filter(p => p.category === product.category && p.id !== product.id);
+        related = window.CATALOG.filter(p => p.category === product.category && p.id !== product.id);
         // If fewer than 4 items, fill up with other products to maintain a full grid
         if (related.length < 4) {
-            const others = CATALOG.filter(p => p.category !== product.category && p.id !== product.id);
+            const others = window.CATALOG.filter(p => p.category !== product.category && p.id !== product.id);
             const needed = 4 - related.length;
             related = [...related, ...others.slice(0, needed)];
         } else {
@@ -1364,7 +1503,9 @@ function initApparelPage() {
 
 // Start loading when page is ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded, starting boot sequence...');
     loadAllComponents().then(() => {
+        console.log('Boot sequence complete.');
         initGoogleAuth();
         
         // Final check for page types
@@ -1375,7 +1516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (isApparelPage) initApparelPage();
         if (isProductPage) initProductPage();
-        if (isShopPage) initShopFilters();
+        // initShopFilters() is already called in loadAllComponents via waitForGrid()
     });
 });
 
