@@ -988,10 +988,6 @@ function renderPDP(container, product) {
             </section>
         </div>
 
-        <div class="pdp-copyright" style="text-align: center; font-size: 13px; color: var(--muted); padding: 60px 0 20px; border-top: 1px solid var(--border-light); margin-top: 80px;">
-            &copy; 2026 Kalyra Studio. All rights reserved.
-        </div>
-
         <div class="pdp-lightbox" id="pdp-lightbox">
             <div class="lightbox-content">
                 <img src="${product.img}" alt="${product.name}" class="lightbox-img" id="lightbox-img">
